@@ -7,15 +7,13 @@ import {
   Code2,
   GraduationCap,
   Link as LinkIcon,
-  Mail,
   Menu,
   Moon,
-  MapPin,
   Sparkles,
   Sun,
   X,
 } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   certificates,
   education,
@@ -35,7 +33,6 @@ const navItems = [
   { id: "formacao", label: "Formação" },
   { id: "certificados", label: "Certificados" },
   { id: "interesses", label: "Interesses" },
-  { id: "contato", label: "Contato" },
 ];
 
 function SectionHeading({
@@ -62,7 +59,6 @@ export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("inicio");
   const [showTop, setShowTop] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [contactStatus, setContactStatus] = useState("");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("portfolio-theme");
@@ -83,6 +79,33 @@ export default function PortfolioPage() {
       darkMode ? "dark" : "light",
     );
   }, [darkMode]);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const revealTargets = document.querySelectorAll(
+      ".section-heading, .about-grid > *, .project-card, .skill-card, .timeline-item, .certificate-card, .hobby-card, .empty-state",
+    );
+    revealTargets.forEach((element) => element.classList.add("scroll-reveal"));
+    document.documentElement.classList.add("scroll-reveal-enabled");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.1 },
+    );
+
+    revealTargets.forEach((element) => observer.observe(element));
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove("scroll-reveal-enabled");
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);
@@ -111,37 +134,6 @@ export default function PortfolioPage() {
   const navigateTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMenuOpen(false);
-  };
-
-  const submitContact = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const name = String(form.get("name") ?? "").trim();
-    const email = String(form.get("email") ?? "").trim();
-    const subject = String(form.get("subject") ?? "").trim();
-    const message = String(form.get("message") ?? "").trim();
-
-    if (!name || !email || !subject || !message) {
-      setContactStatus("Preencha todos os campos antes de continuar.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setContactStatus("Informe um e-mail válido.");
-      return;
-    }
-    if (!profile.email || profile.email.startsWith("[INSERIR")) {
-      setContactStatus("Informe um endereço de e-mail antes de ativar o formulário.");
-      return;
-    }
-
-    const mailBody = [
-      `Nome: ${name}`,
-      `E-mail: ${email}`,
-      "",
-      message,
-    ].join("\n");
-    setContactStatus("Abrindo seu aplicativo de e-mail...");
-    window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailBody)}`;
   };
 
   return (
@@ -205,9 +197,6 @@ export default function PortfolioPage() {
               <div className="hero-actions">
                 <button className="button button-primary" onClick={() => navigateTo("projetos")}>
                   Ver projetos
-                </button>
-                <button className="button button-secondary" onClick={() => navigateTo("contato")}>
-                  Entrar em contato
                 </button>
               </div>
               <div className="social-row">
@@ -443,67 +432,6 @@ export default function PortfolioPage() {
           </div>
         </section>
 
-        <section id="contato" className="section contact-section">
-          <div className="container">
-            <SectionHeading
-              eyebrow="Conecte-se"
-              title="Vamos conversar"
-              description="Tem uma oportunidade ou projeto em mente? Envie uma mensagem."
-            />
-            <div className="contact-grid">
-              <div className="contact-details">
-                <h3>Informações de contato</h3>
-                <p>Os dados reais serão publicados após serem informados.</p>
-                <div className="contact-list">
-                  {profile.email.startsWith("[INSERIR") ? (
-                    <div><Mail size={18} /><span><b>E-mail</b>Configurar e-mail</span></div>
-                  ) : (
-                    <a href={`mailto:${profile.email}`}><Mail size={18} /><span><b>E-mail</b>{profile.email}</span></a>
-                  )}
-                  {profile.location && (
-                    <div><MapPin size={18} /><span><b>Localização</b>{profile.location}</span></div>
-                  )}
-                  {socialLinks.map((social) =>
-                    social.href ? (
-                      <a key={social.label} href={social.href} target="_blank" rel="noreferrer">
-                        <LinkIcon size={18} />
-                        <span><b>{social.label}</b>{social.href}</span>
-                      </a>
-                    ) : (
-                      <div key={social.label}>
-                        <LinkIcon size={18} />
-                        <span><b>{social.label}</b>Configurar URL</span>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-              <form className="contact-form" onSubmit={submitContact} noValidate>
-                <div className="form-row">
-                  <label>
-                    Nome
-                    <input name="name" type="text" placeholder="Seu nome" required />
-                  </label>
-                  <label>
-                    E-mail
-                    <input name="email" type="email" placeholder="seu@email.com" required />
-                  </label>
-                </div>
-                <label>
-                  Assunto
-                  <input name="subject" type="text" placeholder="Assunto da mensagem" required />
-                </label>
-                <label>
-                  Mensagem
-                  <textarea name="message" rows={5} placeholder="Escreva sua mensagem" required />
-                </label>
-                <button className="button button-primary" type="submit">Enviar mensagem</button>
-                {contactStatus && <p className="form-status" role="status">{contactStatus}</p>}
-                <small>O formulário abre o aplicativo de e-mail configurado no dispositivo.</small>
-              </form>
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer>
