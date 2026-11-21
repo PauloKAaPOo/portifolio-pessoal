@@ -1,0 +1,53 @@
+export type SocialLink = {
+  label: string;
+  href: string | null;
+};
+
+export type Project = {
+  name: string;
+  description: string;
+  imageUrl?: string;
+  objective: string;
+  technologies: string[];
+  features: string[];
+  participation: string;
+  status: "Em desenvolvimento" | "Concluído";
+  repositoryUrl?: string;
+  demoUrl?: string;
+};
+
+export type Skill = {
+  name: string;
+  description: string;
+  level?: "Básico" | "Intermediário" | "Avançado";
+};
+
+export type SkillCategory = {
+  title: string;
+  skills: Skill[];
+};
+
+export type Education = {
+  institution: string;
+  course: string;
+  period: string;
+  startDate: string;
+  expectedEnd?: string;
+  description: string;
+};
+
+export type Certificate = {
+  name: string;
+  institution: string;
+  date: string;
+  workload?: string;
+  description: string;
+  imageUrl?: string;
+  validationUrl?: string;
+};
+
+export type Hobby = {
+  name: string;
+  description: string;
+  imageUrl?: string;
+};
