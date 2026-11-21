@@ -44,6 +44,42 @@ export const projects: Project[] = [
     status: "Em desenvolvimento",
   },
   {
+    name: "Plataforma de busca de pós-graduação",
+    description:
+      "Plataforma para organizar e facilitar a descoberta de oportunidades de especialização, mestrado e doutorado no Brasil e no exterior.",
+    objective:
+      "Estruturar informações sobre instituições e programas acadêmicos para facilitar a busca e a comparação de oportunidades nacionais e internacionais.",
+    technologies: ["Java", "Spring Boot", "MySQL", "SQL", "IntelliJ IDEA"],
+    features: [
+      "Levantamento e especificação de requisitos",
+      "Modelagem orientada a objetos e banco de dados",
+      "Organização de instituições e programas acadêmicos",
+      "Busca por oportunidades de especialização, mestrado e doutorado",
+      "Descoberta de instituições via APIs e IA generativa como possibilidades de expansão",
+    ],
+    participation:
+      "Participei do planejamento e desenvolvimento da solução, definição de requisitos e funcionalidades, estruturação de casos de uso, elaboração do diagrama de classes e modelagem do banco de dados.",
+    status: "Em desenvolvimento",
+  },
+  {
+    name: "Plataforma de estudos Java com IA",
+    description:
+      "Plataforma pessoal de aprendizagem que reúne questões de Java, prática de programação, uma IDE integrada e assistência de inteligência artificial.",
+    objective:
+      "Apoiar o aprendizado aprofundado de Java em um ambiente único que conecta estudo teórico, resolução de questões e prática de código.",
+    technologies: ["Java", "Spring Boot", "MySQL", "SQL", "Ollama", "IntelliJ IDEA"],
+    features: [
+      "Banco de questões para estudar e revisar Java",
+      "Ambiente para praticar programação",
+      "IDE integrada para escrever, editar e testar códigos Java",
+      "Agente de IA integrado com Ollama para apoiar o estudante",
+      "Integração entre teoria, exercícios e prática de código",
+    ],
+    participation:
+      "Desenvolvimento solo da proposta e da plataforma, integrando recursos de estudo, prática de programação e assistência inteligente. O escopo atual é focado exclusivamente em Java.",
+    status: "Em desenvolvimento",
+  },
+  {
     name: "Sistema de Reservas em Java",
     description:
       "Projeto de estudo voltado à modelagem orientada a objetos e gerenciamento de reservas.",

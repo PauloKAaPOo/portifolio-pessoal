@@ -84,7 +84,7 @@ export default function PortfolioPage() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const revealTargets = document.querySelectorAll(
-      ".section-heading, .about-grid > *, .project-card, .skill-card, .timeline-item, .certificate-card, .hobby-card, .empty-state",
+      ".section-heading, .about-grid > *, .skill-card, .timeline-item, .certificate-card, .hobby-card, .empty-state",
     );
     revealTargets.forEach((element) => element.classList.add("scroll-reveal"));
     document.documentElement.classList.add("scroll-reveal-enabled");
@@ -106,6 +106,22 @@ export default function PortfolioPage() {
       document.documentElement.classList.remove("scroll-reveal-enabled");
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedProject(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [selectedProject]);
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);
@@ -282,35 +298,59 @@ export default function PortfolioPage() {
               title="Projetos"
               description="Seleção de soluções acadêmicas e práticas, com destaque para complexidade técnica e aprendizado."
             />
-            <div className="project-grid">
-              {projects.map((project) => (
-                <article className="project-card" key={project.name}>
-                  <div className="project-visual">
-                    <div className="window-dots"><i /><i /><i /></div>
-                    {project.imageUrl ? (
-                      <Image src={project.imageUrl} alt={`Prévia do projeto ${project.name}`} fill sizes="(max-width: 720px) 100vw, 580px" />
-                    ) : (
-                      <>
-                        <Code2 size={52} />
-                        <span>Captura do projeto</span>
-                      </>
-                    )}
+            <div className="project-marquee" role="region" aria-label="Carrossel de projetos">
+              <div className="project-track">
+                {[false, true].map((isDuplicate) => (
+                  <div
+                    className="project-track-group"
+                    key={isDuplicate ? "duplicate" : "projects"}
+                    aria-hidden={isDuplicate || undefined}
+                  >
+                    {projects.map((project) => (
+                      <article
+                        className="project-card"
+                        key={`${isDuplicate ? "duplicate-" : ""}${project.name}`}
+                        role="button"
+                        tabIndex={isDuplicate ? -1 : 0}
+                        aria-haspopup="dialog"
+                        aria-label={`Ver detalhes do projeto ${project.name}`}
+                        onClick={() => setSelectedProject(project)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setSelectedProject(project);
+                          }
+                        }}
+                      >
+                        <div className="project-visual">
+                          <div className="window-dots"><i /><i /><i /></div>
+                          {project.imageUrl ? (
+                            <Image src={project.imageUrl} alt={`Prévia do projeto ${project.name}`} fill sizes="(max-width: 720px) 100vw, 340px" />
+                          ) : (
+                            <>
+                              <Code2 size={52} />
+                              <span>Captura do projeto</span>
+                            </>
+                          )}
+                        </div>
+                        <div className="project-content">
+                          <span className="project-status">{project.status}</span>
+                          <h3>{project.name}</h3>
+                          <p>{project.description}</p>
+                          <div className="tag-list">
+                            {project.technologies.map((technology) => (
+                              <span key={technology}>{technology}</span>
+                            ))}
+                          </div>
+                          <span className="text-link">
+                            Ver detalhes <span aria-hidden="true">→</span>
+                          </span>
+                        </div>
+                      </article>
+                    ))}
                   </div>
-                  <div className="project-content">
-                    <span className="project-status">{project.status}</span>
-                    <h3>{project.name}</h3>
-                    <p>{project.description}</p>
-                    <div className="tag-list">
-                      {project.technologies.map((technology) => (
-                        <span key={technology}>{technology}</span>
-                      ))}
-                    </div>
-                    <button className="text-link" onClick={() => setSelectedProject(project)}>
-                      Ver detalhes <span aria-hidden="true">→</span>
-                    </button>
-                  </div>
-                </article>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
