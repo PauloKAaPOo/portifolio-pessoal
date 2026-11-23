@@ -121,7 +121,7 @@ export const skillCategories: SkillCategory[] = [
   {
     title: "Linguagens e fundamentos",
     skills: [
-      { name: "Java", level: "Intermediário", description: "POO e desenvolvimento de aplicações em estudo." },
+      { name: "Java", description: "POO e desenvolvimento de aplicações em estudo." },
       { name: "C", description: "Conhecimentos acadêmicos, lógica e fundamentos de programação." },
       { name: "Python", description: "Utilizado no projeto de reconhecimento facial." },
       { name: "SQL", description: "Consultas e manipulação de dados." },
@@ -130,7 +130,7 @@ export const skillCategories: SkillCategory[] = [
   {
     title: "Back-end e sistemas",
     skills: [
-      { name: "Spring Boot", level: "Básico", description: "Primeiros estudos em aplicações back-end." },
+      { name: "Spring Boot", description: "Primeiros estudos em aplicações back-end." },
       { name: "Programação orientada a objetos", description: "Classes, objetos, responsabilidades e encapsulamento." },
       { name: "Herança e abstração", description: "Estruturação de hierarquias e polimorfismo." },
       { name: "Regras de negócio", description: "Validações e tratamento de exceções." },

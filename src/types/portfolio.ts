@@ -19,7 +19,6 @@ export type Project = {
 export type Skill = {
   name: string;
   description: string;
-  level?: "Básico" | "Intermediário" | "Avançado";
 };
 
 export type SkillCategory = {

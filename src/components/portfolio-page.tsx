@@ -5,6 +5,10 @@ import {
   ArrowUp,
   Award,
   Code2,
+  Coffee,
+  Database,
+  ChevronLeft,
+  ChevronRight,
   GraduationCap,
   Link as LinkIcon,
   Menu,
@@ -13,7 +17,24 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  siC,
+  siCss,
+  siDocker,
+  siGit,
+  siGithub,
+  siHtml5,
+  siMysql,
+  siNextdotjs,
+  siOllama,
+  siPostgresql,
+  siPython,
+  siReact,
+  siSpringboot,
+  siTypescript,
+  type SimpleIcon,
+} from "simple-icons";
+import { useEffect, useRef, useState } from "react";
 import {
   certificates,
   education,
@@ -24,6 +45,21 @@ import {
   socialLinks,
 } from "@/data/portfolio";
 import type { Project } from "@/types/portfolio";
+
+const technologyIcons: Record<string, SimpleIcon[]> = {
+  C: [siC],
+  Python: [siPython],
+  "Spring Boot": [siSpringboot],
+  MySQL: [siMysql],
+  PostgreSQL: [siPostgresql],
+  "Ollama / Open WebUI": [siOllama],
+  "Next.js": [siNextdotjs],
+  React: [siReact],
+  TypeScript: [siTypescript],
+  "HTML / CSS": [siHtml5, siCss],
+  "Git / GitHub": [siGit, siGithub],
+  Docker: [siDocker],
+};
 
 const navItems = [
   { id: "inicio", label: "Início" },
@@ -59,6 +95,22 @@ export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("inicio");
   const [showTop, setShowTop] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectPage, setProjectPage] = useState(0);
+  const [projectsPerPage, setProjectsPerPage] = useState(3);
+  const swipeStartX = useRef<number | null>(null);
+  const didSwipe = useRef(false);
+  const projectPages = Array.from(
+    { length: Math.ceil(projects.length / projectsPerPage) },
+    (_, pageIndex) =>
+      projects.slice(
+        pageIndex * projectsPerPage,
+        (pageIndex + 1) * projectsPerPage,
+      ),
+  );
+  const activeProjectPage = Math.min(
+    projectPage,
+    Math.max(0, projectPages.length - 1),
+  );
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("portfolio-theme");
@@ -124,6 +176,20 @@ export default function PortfolioPage() {
   }, [selectedProject]);
 
   useEffect(() => {
+    const updateProjectsPerPage = () => {
+      setProjectsPerPage(
+        window.innerWidth <= 720 ? 1 : window.innerWidth <= 980 ? 2 : 3,
+      );
+    };
+
+    updateProjectsPerPage();
+    window.addEventListener("resize", updateProjectsPerPage, {
+      passive: true,
+    });
+    return () => window.removeEventListener("resize", updateProjectsPerPage);
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 500);
     const observer = new IntersectionObserver(
       (entries) => {
@@ -150,6 +216,10 @@ export default function PortfolioPage() {
   const navigateTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMenuOpen(false);
+  };
+
+  const goToProjectPage = (page: number) => {
+    setProjectPage(Math.max(0, Math.min(page, projectPages.length - 1)));
   };
 
   return (
@@ -298,59 +368,125 @@ export default function PortfolioPage() {
               title="Projetos"
               description="Seleção de soluções acadêmicas e práticas, com destaque para complexidade técnica e aprendizado."
             />
-            <div className="project-marquee" role="region" aria-label="Carrossel de projetos">
-              <div className="project-track">
-                {[false, true].map((isDuplicate) => (
-                  <div
-                    className="project-track-group"
-                    key={isDuplicate ? "duplicate" : "projects"}
-                    aria-hidden={isDuplicate || undefined}
-                  >
-                    {projects.map((project) => (
-                      <article
-                        className="project-card"
-                        key={`${isDuplicate ? "duplicate-" : ""}${project.name}`}
-                        role="button"
-                        tabIndex={isDuplicate ? -1 : 0}
-                        aria-haspopup="dialog"
-                        aria-label={`Ver detalhes do projeto ${project.name}`}
-                        onClick={() => setSelectedProject(project)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            setSelectedProject(project);
-                          }
-                        }}
-                      >
-                        <div className="project-visual">
-                          <div className="window-dots"><i /><i /><i /></div>
-                          {project.imageUrl ? (
-                            <Image src={project.imageUrl} alt={`Prévia do projeto ${project.name}`} fill sizes="(max-width: 720px) 100vw, 340px" />
-                          ) : (
-                            <>
-                              <Code2 size={52} />
-                              <span>Captura do projeto</span>
-                            </>
-                          )}
-                        </div>
-                        <div className="project-content">
-                          <span className="project-status">{project.status}</span>
-                          <h3>{project.name}</h3>
-                          <p>{project.description}</p>
-                          <div className="tag-list">
-                            {project.technologies.map((technology) => (
-                              <span key={technology}>{technology}</span>
-                            ))}
+            <div className="project-carousel-shell">
+              <button
+                className="carousel-arrow"
+                type="button"
+                aria-label="Projetos anteriores"
+                onClick={() => goToProjectPage(activeProjectPage - 1)}
+                disabled={activeProjectPage === 0}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div
+                className="project-viewport"
+                role="region"
+                aria-roledescription="carrossel"
+                aria-label="Projetos em destaque"
+                onTouchStart={(event) => {
+                  swipeStartX.current = event.touches[0]?.clientX ?? null;
+                  didSwipe.current = false;
+                }}
+                onTouchEnd={(event) => {
+                  const startX = swipeStartX.current;
+                  const endX = event.changedTouches[0]?.clientX;
+                  swipeStartX.current = null;
+                  if (startX === null || endX === undefined) return;
+
+                  const distance = startX - endX;
+                  if (Math.abs(distance) < 50) return;
+
+                  didSwipe.current = true;
+                  goToProjectPage(activeProjectPage + (distance > 0 ? 1 : -1));
+                }}
+                onClickCapture={(event) => {
+                  if (!didSwipe.current) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  didSwipe.current = false;
+                }}
+              >
+                <div
+                  className="project-track"
+                  style={{ transform: `translateX(-${activeProjectPage * 100}%)` }}
+                >
+                  {projectPages.map((pageProjects, pageIndex) => (
+                    <div
+                      className="project-page"
+                      key={pageIndex}
+                      role="group"
+                      aria-roledescription="slide"
+                      aria-hidden={pageIndex !== activeProjectPage}
+                      inert={pageIndex !== activeProjectPage}
+                      aria-label={`Página ${pageIndex + 1} de ${projectPages.length}`}
+                    >
+                      {pageProjects.map((project) => (
+                        <article
+                          className="project-card"
+                          key={project.name}
+                          role="button"
+                          tabIndex={0}
+                          aria-haspopup="dialog"
+                          aria-label={`Ver detalhes do projeto ${project.name}`}
+                          onClick={() => setSelectedProject(project)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setSelectedProject(project);
+                            }
+                          }}
+                        >
+                          <div className="project-visual">
+                            <div className="window-dots"><i /><i /><i /></div>
+                            {project.imageUrl ? (
+                              <Image src={project.imageUrl} alt={`Prévia do projeto ${project.name}`} fill sizes="(max-width: 720px) 100vw, 340px" />
+                            ) : (
+                              <>
+                                <Code2 size={52} />
+                                <span>Captura do projeto</span>
+                              </>
+                            )}
                           </div>
-                          <span className="text-link">
-                            Ver detalhes <span aria-hidden="true">→</span>
-                          </span>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                ))}
+                          <div className="project-content">
+                            <span className="project-status">{project.status}</span>
+                            <h3>{project.name}</h3>
+                            <p>{project.description}</p>
+                            <div className="tag-list">
+                              {project.technologies.map((technology) => (
+                                <span key={technology}>{technology}</span>
+                              ))}
+                            </div>
+                            <span className="text-link">
+                              Ver detalhes <span aria-hidden="true">→</span>
+                            </span>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
+              <button
+                className="carousel-arrow"
+                type="button"
+                aria-label="Próximos projetos"
+                onClick={() => goToProjectPage(activeProjectPage + 1)}
+                disabled={activeProjectPage >= projectPages.length - 1}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+            <div className="carousel-pagination" aria-label="Paginação dos projetos">
+              {projectPages.map((_, pageIndex) => (
+                <button
+                  key={pageIndex}
+                  type="button"
+                  className={`carousel-dot${pageIndex === activeProjectPage ? " is-active" : ""}`}
+                  aria-label={`Ir para a página ${pageIndex + 1}`}
+                  aria-current={pageIndex === activeProjectPage ? "step" : undefined}
+                  onClick={() => goToProjectPage(pageIndex)}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -359,24 +495,40 @@ export default function PortfolioPage() {
           <div className="container">
             <SectionHeading
               eyebrow="Tecnologias"
-              title="Skills e conhecimentos"
-              description="Competências organizadas por área, preparadas para atualização contínua."
+              title="Tecnologias que conheço"
+              description="Linguagens, ferramentas e fundamentos que fazem parte dos meus estudos e projetos."
             />
             <div className="skills-grid">
               {skillCategories.map((category) => (
-                <article className="skill-card" key={category.title}>
-                  <div className="card-icon"><Code2 size={20} /></div>
-                  <h3>{category.title}</h3>
-                  {category.skills.map((skill) => (
-                    <div className="skill-item" key={skill.name}>
-                      <div>
-                        <b>{skill.name}</b>
-                        {skill.level && <span>{skill.level}</span>}
+                category.skills.map((skill) => {
+                  const icons = technologyIcons[skill.name] ?? [];
+                  return (
+                    <article className="skill-card" key={skill.name}>
+                      <div className="skill-logo" aria-hidden="true">
+                        {icons.length > 0 ? (
+                          icons.map((icon) => (
+                            <svg
+                              key={icon.slug}
+                              viewBox="0 0 24 24"
+                              role="presentation"
+                            >
+                              <path d={icon.path} />
+                            </svg>
+                          ))
+                        ) : skill.name === "Java" ? (
+                          <Coffee size={25} />
+                        ) : skill.name === "SQL" ||
+                          skill.name === "pgvector" ? (
+                          <Database size={25} />
+                        ) : (
+                          <Code2 size={25} />
+                        )}
                       </div>
+                      <h3>{skill.name}</h3>
                       <p>{skill.description}</p>
-                    </div>
-                  ))}
-                </article>
+                    </article>
+                  );
+                })
               ))}
             </div>
           </div>
