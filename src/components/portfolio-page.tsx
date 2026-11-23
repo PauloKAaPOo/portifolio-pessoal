@@ -512,7 +512,23 @@ export default function PortfolioPage() {
                               viewBox="0 0 24 24"
                               role="presentation"
                             >
-                              <path d={icon.path} />
+                              <defs>
+                                <linearGradient
+                                  id={`skill-icon-gradient-${icon.slug}`}
+                                  x1="0"
+                                  y1="0"
+                                  x2="24"
+                                  y2="24"
+                                  gradientUnits="userSpaceOnUse"
+                                >
+                                  <stop stopColor="#5c9bff" />
+                                  <stop offset="1" stopColor="#a56bff" />
+                                </linearGradient>
+                              </defs>
+                              <path
+                                d={icon.path}
+                                fill={`url(#skill-icon-gradient-${icon.slug})`}
+                              />
                             </svg>
                           ))
                         ) : skill.name === "Java" ? (
