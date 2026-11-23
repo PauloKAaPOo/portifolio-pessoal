@@ -108,7 +108,7 @@ export default function ProjectPresentation({
         aria-labelledby="project-modal-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <section className="project-information">
+        <section className={`project-information${isClosing ? " is-closing" : ""}`}>
           <button className="modal-close" onClick={onClose} aria-label="Fechar apresentação">
             <X size={19} />
           </button>

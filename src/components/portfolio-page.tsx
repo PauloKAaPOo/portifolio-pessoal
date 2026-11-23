@@ -5,8 +5,6 @@ import {
   ArrowUp,
   Award,
   Code2,
-  Coffee,
-  Database,
   ChevronLeft,
   ChevronRight,
   GraduationCap,
@@ -32,8 +30,8 @@ import {
   skillCategories,
   socialLinks,
 } from "@/data/portfolio";
-import { technologyIcons } from "@/data/technology-icons";
 import ProjectPresentation from "@/components/project-presentation";
+import TechnologyField from "@/components/technology-field";
 import type { Project } from "@/types/portfolio";
 
 const navItems = [
@@ -609,55 +607,9 @@ export default function PortfolioPage() {
               title="Tecnologias que conheço"
               description="Linguagens, ferramentas e fundamentos que fazem parte dos meus estudos e projetos."
             />
-            <div className="skills-grid">
-              {skillCategories.map((category) => (
-                category.skills.map((skill) => {
-                  const icons = technologyIcons[skill.name] ?? [];
-                  return (
-                    <article className="skill-card" key={skill.name}>
-                      <div className="skill-logo" aria-hidden="true">
-                        {icons.length > 0 ? (
-                          icons.map((icon) => (
-                            <svg
-                              key={icon.slug}
-                              viewBox="0 0 24 24"
-                              role="presentation"
-                            >
-                              <defs>
-                                <linearGradient
-                                  id={`skill-icon-gradient-${icon.slug}`}
-                                  x1="0"
-                                  y1="0"
-                                  x2="24"
-                                  y2="24"
-                                  gradientUnits="userSpaceOnUse"
-                                >
-                                  <stop stopColor="#792d38" />
-                                  <stop offset="1" stopColor="#c96f60" />
-                                </linearGradient>
-                              </defs>
-                              <path
-                                d={icon.path}
-                                fill={`url(#skill-icon-gradient-${icon.slug})`}
-                              />
-                            </svg>
-                          ))
-                        ) : skill.name === "Java" ? (
-                          <Coffee size={25} />
-                        ) : skill.name === "SQL" ||
-                          skill.name === "pgvector" ? (
-                          <Database size={25} />
-                        ) : (
-                          <Code2 size={25} />
-                        )}
-                      </div>
-                      <h3>{skill.name}</h3>
-                      <p>{skill.description}</p>
-                    </article>
-                  );
-                })
-              ))}
-            </div>
+            <TechnologyField
+              skills={skillCategories.flatMap((category) => category.skills)}
+            />
           </div>
         </section>
 
