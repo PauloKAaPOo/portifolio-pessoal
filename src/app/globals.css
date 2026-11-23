@@ -467,41 +467,13 @@ a { color: inherit; text-decoration: none; }
 .technology-field {
   position: relative;
   height: clamp(430px, 48vw, 560px);
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--wine) 22%, var(--line));
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--terracotta) 10%, transparent), transparent 28%),
-    radial-gradient(circle at 82% 76%, color-mix(in srgb, var(--wine) 9%, transparent), transparent 30%),
-    color-mix(in srgb, var(--surface-soft) 64%, var(--surface));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--cream) 45%, transparent), var(--shadow);
-  isolation: isolate;
-}
-.technology-field-decoration { position: absolute; inset: 0; pointer-events: none; }
-.technology-field-decoration i {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--terracotta);
-  opacity: .32;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--terracotta) 45%, transparent);
-}
-.technology-field-decoration i:nth-child(1) { left: 8%; top: 18%; }
-.technology-field-decoration i:nth-child(2) { left: 42%; top: 8%; }
-.technology-field-decoration i:nth-child(3) { right: 12%; top: 28%; }
-.technology-field-decoration i:nth-child(4) { left: 24%; bottom: 12%; }
-.technology-field-decoration i:nth-child(5) { right: 28%; bottom: 8%; }
-.technology-float {
-  position: absolute;
-  z-index: 2;
-  inset: 0 auto auto 0;
-  width: 150px;
-  height: 94px;
-  pointer-events: none;
-  animation: technology-float var(--float-duration) ease-in-out var(--float-delay) infinite alternate;
+  overflow: visible;
 }
 .technology-item {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
   width: 150px;
   height: 94px;
   display: flex;
@@ -529,11 +501,6 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 22px 38px color-mix(in srgb, var(--coffee) 24%, transparent), 0 0 0 3px color-mix(in srgb, var(--terracotta) 18%, transparent);
   scale: 1.06;
   cursor: grabbing;
-}
-.technology-float:has(.technology-item.is-dragging) { animation-play-state: paused; z-index: 20; }
-@keyframes technology-float {
-  from { transform: translate3d(calc(var(--float-x) * -1), 2px, 0) rotate(calc(var(--float-rotate) * -1)); }
-  to { transform: translate3d(var(--float-x), var(--float-y), 0) rotate(var(--float-rotate)); }
 }
 .card-icon, .certificate-icon, .hobby-icon {
   width: 42px;
@@ -928,7 +895,6 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   .gallery-arrow-previous { left: 10px; }
   .gallery-arrow-next { right: 10px; }
   .technology-field { height: 650px; }
-  .technology-float { width: 132px; height: 84px; }
   .technology-item { width: 132px; height: 84px; }
   .technology-logo svg { width: 26px; height: 26px; }
   .technology-name { max-width: 116px; }
@@ -937,6 +903,5 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
 @media (prefers-reduced-motion: reduce) {
   .project-gallery, .project-gallery-slide { animation: none !important; }
   .project-gallery { transition: none !important; }
-  .technology-float { animation: none !important; }
   .technology-item { transition: none !important; }
 }
