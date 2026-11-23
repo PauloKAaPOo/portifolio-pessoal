@@ -99,6 +99,8 @@ export default function PortfolioPage() {
   const [projectsPerPage, setProjectsPerPage] = useState(3);
   const swipeStartX = useRef<number | null>(null);
   const didSwipe = useRef(false);
+  const projectModalRef = useRef<HTMLDivElement>(null);
+  const dialogReturnFocus = useRef<HTMLElement | null>(null);
   const projectPages = Array.from(
     { length: Math.ceil(projects.length / projectsPerPage) },
     (_, pageIndex) =>
@@ -136,7 +138,7 @@ export default function PortfolioPage() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const revealTargets = document.querySelectorAll(
-      ".section-heading, .about-grid > *, .skill-card, .timeline-item, .certificate-card, .hobby-card, .empty-state",
+      ".section-heading, .about-grid > *, .project-card, .skill-card, .timeline-item, .certificate-card, .hobby-card, .empty-state",
     );
     revealTargets.forEach((element) => element.classList.add("scroll-reveal"));
     document.documentElement.classList.add("scroll-reveal-enabled");
@@ -163,17 +165,93 @@ export default function PortfolioPage() {
     if (!selectedProject) return;
 
     const previousOverflow = document.body.style.overflow;
+    dialogReturnFocus.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     document.body.style.overflow = "hidden";
+    projectModalRef.current
+      ?.querySelector<HTMLElement>("button, a[href]")
+      ?.focus();
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedProject(null);
+      if (event.key === "Escape") {
+        setSelectedProject(null);
+        return;
+      }
+
+      if (event.key !== "Tab" || !projectModalRef.current) return;
+
+      const focusable = projectModalRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      dialogReturnFocus.current?.focus();
     };
   }, [selectedProject]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMenuOpen(false);
+      document.getElementById("menu-toggle")?.focus();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+    if (prefersReducedMotion || !hasFinePointer) return;
+
+    let frame = 0;
+    let latestPointer: PointerEvent | null = null;
+    const onPointerMove = (event: PointerEvent) => {
+      latestPointer = event;
+      if (frame) return;
+
+      frame = window.requestAnimationFrame(() => {
+        if (latestPointer) {
+          document.documentElement.style.setProperty(
+            "--pointer-x",
+            `${latestPointer.clientX}px`,
+          );
+          document.documentElement.style.setProperty(
+            "--pointer-y",
+            `${latestPointer.clientY}px`,
+          );
+        }
+        frame = 0;
+      });
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   useEffect(() => {
     const updateProjectsPerPage = () => {
@@ -214,7 +292,10 @@ export default function PortfolioPage() {
   }, []);
 
   const navigateTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth";
+    document.getElementById(id)?.scrollIntoView({ behavior });
     setMenuOpen(false);
   };
 
@@ -224,6 +305,7 @@ export default function PortfolioPage() {
 
   return (
     <>
+      <div className="ambient-background" aria-hidden="true" />
       <header className="site-header">
         <div className="nav-shell">
           <button
@@ -235,11 +317,16 @@ export default function PortfolioPage() {
             <b>Paulo Coelho</b>
           </button>
 
-          <nav className={menuOpen ? "nav-links is-open" : "nav-links"} aria-label="Navegação principal">
+          <nav
+            id="primary-navigation"
+            className={menuOpen ? "nav-links is-open" : "nav-links"}
+            aria-label="Navegação principal"
+          >
             {navItems.map((item) => (
               <button
                 key={item.id}
                 className={activeSection === item.id ? "active" : ""}
+                aria-current={activeSection === item.id ? "location" : undefined}
                 onClick={() => navigateTo(item.id)}
               >
                 {item.label}
@@ -257,9 +344,11 @@ export default function PortfolioPage() {
             </button>
             <button
               className="icon-button menu-button"
+              id="menu-toggle"
               onClick={() => setMenuOpen((current) => !current)}
-              aria-label="Abrir menu"
+              aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menuOpen}
+              aria-controls="primary-navigation"
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -659,16 +748,17 @@ export default function PortfolioPage() {
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setSelectedProject(null)}>
           <div
             className="project-modal"
+            ref={projectModalRef}
             role="dialog"
             aria-modal="true"
-            aria-label={`Detalhes do projeto ${selectedProject.name}`}
+            aria-labelledby="project-modal-title"
             onMouseDown={(event) => event.stopPropagation()}
           >
             <button className="modal-close" onClick={() => setSelectedProject(null)} aria-label="Fechar detalhes">
               <X size={19} />
             </button>
             <span className="eyebrow">Projeto em destaque</span>
-            <h2>{selectedProject.name}</h2>
+            <h2 id="project-modal-title">{selectedProject.name}</h2>
             <p>{selectedProject.description}</p>
             <div className="modal-grid">
               <div><b>Objetivo</b><p>{selectedProject.objective}</p></div>
