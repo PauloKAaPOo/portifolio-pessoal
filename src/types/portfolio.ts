@@ -4,16 +4,26 @@ export type SocialLink = {
 };
 
 export type Project = {
+  id: string;
   name: string;
+  category: string;
   description: string;
-  imageUrl?: string;
+  coverImage?: string;
   objective: string;
   technologies: string[];
   features: string[];
   participation: string;
+  images: ProjectImage[];
   status: "Em desenvolvimento" | "Concluído";
   repositoryUrl?: string;
   demoUrl?: string;
+};
+
+export type ProjectImage = {
+  id: string;
+  image: string;
+  title: string;
+  description: string;
 };
 
 export type Skill = {

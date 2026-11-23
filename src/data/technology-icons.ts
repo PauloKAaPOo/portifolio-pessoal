@@ -1,0 +1,32 @@
+import {
+  siC,
+  siCss,
+  siDocker,
+  siGit,
+  siGithub,
+  siHtml5,
+  siMysql,
+  siNextdotjs,
+  siOllama,
+  siPostgresql,
+  siPython,
+  siReact,
+  siSpringboot,
+  siTypescript,
+  type SimpleIcon,
+} from "simple-icons";
+
+export const technologyIcons: Record<string, SimpleIcon[]> = {
+  C: [siC],
+  Python: [siPython],
+  "Spring Boot": [siSpringboot],
+  MySQL: [siMysql],
+  PostgreSQL: [siPostgresql],
+  "Ollama / Open WebUI": [siOllama],
+  "Next.js": [siNextdotjs],
+  React: [siReact],
+  TypeScript: [siTypescript],
+  "HTML / CSS": [siHtml5, siCss],
+  "Git / GitHub": [siGit, siGithub],
+  Docker: [siDocker],
+};

@@ -18,23 +18,11 @@ import {
   X,
 } from "lucide-react";
 import {
-  siC,
-  siCss,
-  siDocker,
-  siGit,
-  siGithub,
-  siHtml5,
-  siMysql,
-  siNextdotjs,
-  siOllama,
-  siPostgresql,
-  siPython,
-  siReact,
-  siSpringboot,
-  siTypescript,
-  type SimpleIcon,
-} from "simple-icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   certificates,
   education,
@@ -44,22 +32,9 @@ import {
   skillCategories,
   socialLinks,
 } from "@/data/portfolio";
+import { technologyIcons } from "@/data/technology-icons";
+import ProjectPresentation from "@/components/project-presentation";
 import type { Project } from "@/types/portfolio";
-
-const technologyIcons: Record<string, SimpleIcon[]> = {
-  C: [siC],
-  Python: [siPython],
-  "Spring Boot": [siSpringboot],
-  MySQL: [siMysql],
-  PostgreSQL: [siPostgresql],
-  "Ollama / Open WebUI": [siOllama],
-  "Next.js": [siNextdotjs],
-  React: [siReact],
-  TypeScript: [siTypescript],
-  "HTML / CSS": [siHtml5, siCss],
-  "Git / GitHub": [siGit, siGithub],
-  Docker: [siDocker],
-};
 
 const navItems = [
   { id: "inicio", label: "Início" },
@@ -96,6 +71,12 @@ export default function PortfolioPage() {
   const [showTop, setShowTop] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectGalleryIndex, setProjectGalleryIndex] = useState(0);
+  const [projectOrigin, setProjectOrigin] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const [isClosingProject, setIsClosingProject] = useState(false);
   const [projectPage, setProjectPage] = useState(0);
   const [projectsPerPage, setProjectsPerPage] = useState(3);
@@ -117,13 +98,15 @@ export default function PortfolioPage() {
     Math.max(0, projectPages.length - 1),
   );
 
-  const openProject = (project: Project) => {
+  const openProject = (project: Project, card: HTMLElement) => {
     if (closeProjectTimeout.current) {
       window.clearTimeout(closeProjectTimeout.current);
       closeProjectTimeout.current = null;
     }
     setProjectGalleryIndex(0);
     setIsClosingProject(false);
+    const { left, top, width, height } = card.getBoundingClientRect();
+    setProjectOrigin({ left, top, width, height });
     setSelectedProject(project);
   };
 
@@ -132,6 +115,7 @@ export default function PortfolioPage() {
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setSelectedProject(null);
+      setProjectOrigin(null);
       return;
     }
 
@@ -141,9 +125,10 @@ export default function PortfolioPage() {
     setIsClosingProject(true);
     closeProjectTimeout.current = window.setTimeout(() => {
       setSelectedProject(null);
+      setProjectOrigin(null);
       setIsClosingProject(false);
       closeProjectTimeout.current = null;
-    }, 420);
+    }, 540);
   }, [selectedProject]);
 
   useEffect(() => {
@@ -547,34 +532,35 @@ export default function PortfolioPage() {
                     >
                       {pageProjects.map((project) => (
                         <article
-                          className="project-card"
+                          className={`project-card${selectedProject?.id === project.id ? " is-selected" : ""}`}
                           key={project.name}
                           role="button"
                           tabIndex={0}
                           aria-haspopup="dialog"
                           aria-label={`Ver detalhes do projeto ${project.name}`}
-                          onClick={() => openProject(project)}
+                          onClick={(event) => openProject(project, event.currentTarget)}
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              openProject(project);
+                              openProject(project, event.currentTarget);
                             }
                           }}
                         >
                           <div className="project-visual">
                             <div className="window-dots"><i /><i /><i /></div>
-                            {project.imageUrl ? (
-                              <Image src={project.imageUrl} alt={`Prévia do projeto ${project.name}`} fill sizes="(max-width: 720px) 100vw, 340px" />
+                            {project.coverImage ? (
+                              <Image src={project.coverImage} alt={`Capa do projeto ${project.name}`} fill sizes="(max-width: 720px) 100vw, 340px" />
                             ) : (
                               <>
                                 <Code2 size={52} />
-                                <span>Captura do projeto</span>
+                                <span>Capturas não cadastradas</span>
                               </>
                             )}
                           </div>
                           <div className="project-content">
                             <span className="project-status">{project.status}</span>
                             <h3>{project.name}</h3>
+                            <span className="project-category">{project.category}</span>
                             <p>{project.description}</p>
                             <div className="tag-list">
                               {project.technologies.map((technology) => (
@@ -646,8 +632,8 @@ export default function PortfolioPage() {
                                   y2="24"
                                   gradientUnits="userSpaceOnUse"
                                 >
-                                  <stop stopColor="#5c9bff" />
-                                  <stop offset="1" stopColor="#a56bff" />
+                                  <stop stopColor="#792d38" />
+                                  <stop offset="1" stopColor="#c96f60" />
                                 </linearGradient>
                               </defs>
                               <path
@@ -781,129 +767,15 @@ export default function PortfolioPage() {
       )}
 
       {selectedProject && (
-        <div
-          className={`project-presentation-backdrop${isClosingProject ? " is-closing" : ""}`}
-          role="presentation"
-          onMouseDown={closeProject}
-        >
-          <div
-            className={`project-presentation${isClosingProject ? " is-closing" : ""}`}
-            ref={projectModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="project-modal-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <section className="project-information">
-              <button className="modal-close" onClick={closeProject} aria-label="Fechar detalhes">
-                <X size={19} />
-              </button>
-              <span className="eyebrow">Projeto em destaque</span>
-              <h2 id="project-modal-title">{selectedProject.name}</h2>
-              <p className="project-presentation-description">{selectedProject.description}</p>
-              <div className="project-details">
-                <div><b>Objetivo</b><p>{selectedProject.objective}</p></div>
-                <div><b>Participação</b><p>{selectedProject.participation}</p></div>
-                <div>
-                  <b>Tecnologias</b>
-                  <div className="tag-list">
-                    {selectedProject.technologies.map((technology) => <span key={technology}>{technology}</span>)}
-                  </div>
-                </div>
-                <div><b>Funcionalidades</b><ul>{selectedProject.features.map((feature) => <li key={feature}>{feature}</li>)}</ul></div>
-              </div>
-              <div className="modal-actions">
-                {selectedProject.repositoryUrl && (
-                  <a className="button button-primary" href={selectedProject.repositoryUrl} target="_blank" rel="noreferrer">
-                    <LinkIcon size={17} /> Repositório
-                  </a>
-                )}
-                {selectedProject.demoUrl && (
-                  <a className="button button-secondary" href={selectedProject.demoUrl} target="_blank" rel="noreferrer">Ver demonstração</a>
-                )}
-              </div>
-            </section>
-            <section className="project-gallery" aria-label="Galeria de prévias ilustrativas">
-              <div className="project-gallery-heading">
-                <span>Visão do projeto</span>
-                <span>{String(projectGalleryIndex + 1).padStart(2, "0")} / 03</span>
-              </div>
-              <div
-                key={projectGalleryIndex}
-                className={`project-gallery-art project-gallery-art-${projectGalleryIndex + 1}`}
-                role="img"
-                aria-label={`Prévia ilustrativa ${projectGalleryIndex + 1} de 3 para ${selectedProject.name}`}
-              >
-                <div className="gallery-window-bar" aria-hidden="true">
-                  <span /><span /><span />
-                  <b>PRÉVIA ILUSTRATIVA</b>
-                </div>
-                <div className="gallery-window-content" aria-hidden="true">
-                  <div className="gallery-side-mark" />
-                  <div className="gallery-content-main">
-                    <div className="gallery-preview-kicker">
-                      {projectGalleryIndex === 0 ? "PAINEL DO PROJETO" : projectGalleryIndex === 1 ? "VISÃO GERAL" : "DETALHES"}
-                    </div>
-                    <div className="gallery-preview-title">{selectedProject.name}</div>
-                    {projectGalleryIndex === 0 ? (
-                      <div className="gallery-dashboard">
-                        <div className="gallery-stat"><span>STATUS</span><b>{selectedProject.status}</b></div>
-                        <div className="gallery-stat"><span>TECNOLOGIAS</span><b>{selectedProject.technologies.length}</b></div>
-                        <div className="gallery-chart"><i /><i /><i /><i /><i /><i /><i /></div>
-                      </div>
-                    ) : projectGalleryIndex === 1 ? (
-                      <div className="gallery-list">
-                        {selectedProject.features.slice(0, 3).map((feature, index) => (
-                          <div className="gallery-list-row" key={feature}>
-                            <span>0{index + 1}</span><b>{feature}</b><i />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="gallery-code">
-                        <span>01</span><i /><b>{selectedProject.technologies[0] ?? "Projeto"}</b>
-                        <span>02</span><i /><b>Organização e estrutura</b>
-                        <span>03</span><i /><b>Solução em desenvolvimento</b>
-                        <span>04</span><i /><b>Experiência clara e funcional</b>
-                      </div>
-                    )}
-                    <div className="gallery-tech-list">
-                      {selectedProject.technologies.slice(0, 3).map((technology) => <span key={technology}>{technology}</span>)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <button
-                className="gallery-arrow gallery-arrow-previous"
-                type="button"
-                aria-label="Prévia anterior"
-                onClick={() => setProjectGalleryIndex((index) => (index + 2) % 3)}
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                className="gallery-arrow gallery-arrow-next"
-                type="button"
-                aria-label="Próxima prévia"
-                onClick={() => setProjectGalleryIndex((index) => (index + 1) % 3)}
-              >
-                <ChevronRight size={20} />
-              </button>
-              <div className="gallery-pagination" aria-label="Indicadores da galeria">
-                {[0, 1, 2].map((index) => (
-                  <button
-                    key={index}
-                    className={index === projectGalleryIndex ? "is-active" : ""}
-                    type="button"
-                    aria-label={`Mostrar prévia ${index + 1}`}
-                    aria-current={index === projectGalleryIndex ? "true" : undefined}
-                    onClick={() => setProjectGalleryIndex(index)}
-                  />
-                ))}
-              </div>
-            </section>
-          </div>
-        </div>
+        <ProjectPresentation
+          project={selectedProject}
+          galleryIndex={projectGalleryIndex}
+          isClosing={isClosingProject}
+          origin={projectOrigin}
+          dialogRef={projectModalRef}
+          onClose={closeProject}
+          onGalleryIndexChange={setProjectGalleryIndex}
+        />
       )}
     </>
   );

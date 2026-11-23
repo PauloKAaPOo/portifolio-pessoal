@@ -26,7 +26,9 @@ export const socialLinks: SocialLink[] = [
 
 export const projects: Project[] = [
   {
+    id: "presenca-ligas-ceuma",
     name: "Sistema de Presença das Ligas CEUMA",
+    category: "Sistema acadêmico",
     description:
       "Sistema para gerenciar presença em ligas acadêmicas por meio de reconhecimento facial e controle de reuniões.",
     objective:
@@ -41,10 +43,13 @@ export const projects: Project[] = [
     ],
     participation:
       "Atuação no desenvolvimento da solução, integração de reconhecimento facial e organização dos dados.",
+    images: [],
     status: "Em desenvolvimento",
   },
   {
+    id: "busca-pos-graduacao",
     name: "Plataforma de busca de pós-graduação",
+    category: "Plataforma educacional",
     description:
       "Plataforma para organizar e facilitar a descoberta de oportunidades de especialização, mestrado e doutorado no Brasil e no exterior.",
     objective:
@@ -59,10 +64,13 @@ export const projects: Project[] = [
     ],
     participation:
       "Participei do planejamento e desenvolvimento da solução, definição de requisitos e funcionalidades, estruturação de casos de uso, elaboração do diagrama de classes e modelagem do banco de dados.",
+    images: [],
     status: "Em desenvolvimento",
   },
   {
+    id: "estudos-java-ia",
     name: "Plataforma de estudos Java com IA",
+    category: "Plataforma de estudos",
     description:
       "Plataforma pessoal de aprendizagem que reúne questões de Java, prática de programação, uma IDE integrada e assistência de inteligência artificial.",
     objective:
@@ -77,10 +85,13 @@ export const projects: Project[] = [
     ],
     participation:
       "Desenvolvimento solo da proposta e da plataforma, integrando recursos de estudo, prática de programação e assistência inteligente. O escopo atual é focado exclusivamente em Java.",
+    images: [],
     status: "Em desenvolvimento",
   },
   {
+    id: "reservas-java",
     name: "Sistema de Reservas em Java",
+    category: "Sistema de reservas",
     description:
       "Projeto de estudo voltado à modelagem orientada a objetos e gerenciamento de reservas.",
     objective:
@@ -95,10 +106,13 @@ export const projects: Project[] = [
     ],
     participation:
       "Desenvolvimento individual com foco em abstração, organização de classes e controle de estados.",
+    images: [],
     status: "Em desenvolvimento",
   },
   {
+    id: "projetos-praticos-java",
     name: "Projetos práticos em Java",
+    category: "Projetos de estudo",
     description:
       "Coleção de exercícios para consolidar os fundamentos da linguagem e da programação orientada a objetos.",
     objective:
@@ -113,6 +127,7 @@ export const projects: Project[] = [
     ],
     participation:
       "Implementação dos exercícios para evoluir fundamentos de Java e organização de código.",
+    images: [],
     status: "Concluído",
   },
 ];
