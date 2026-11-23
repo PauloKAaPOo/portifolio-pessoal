@@ -467,10 +467,10 @@ a { color: inherit; text-decoration: none; }
 .technology-field {
   position: relative;
   height: clamp(430px, 48vw, 560px);
-  overflow: visible;
+  overflow: hidden;
 }
 .technology-item {
-  position: fixed;
+  position: absolute;
   z-index: 100;
   top: 0;
   left: 0;

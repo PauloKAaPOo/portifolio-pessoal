@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -13,6 +14,7 @@ import { technologyIcons } from "@/data/technology-icons";
 import type { Skill } from "@/types/portfolio";
 
 type Point = { x: number; y: number };
+type Size = { width: number; height: number };
 
 type Body = {
   x: number;
@@ -38,6 +40,7 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
   const fieldRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const bodiesRef = useRef<Body[]>([]);
+  const fieldSizeRef = useRef<Size | null>(null);
   const frameRef = useRef<number | null>(null);
   const draggingRef = useRef<number | null>(null);
   const lastInteractionRef = useRef(0);
@@ -61,6 +64,61 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
     card.style.transform =
       `translate3d(${body.x}px, ${body.y}px, 0) rotate(${body.angle}deg)`;
   };
+
+  const getBodyBounds = useCallback((body: Body) => {
+    const field = fieldRef.current;
+    const radians = (body.angle * Math.PI) / 180;
+    const halfWidth =
+      (Math.abs(Math.cos(radians)) * body.width +
+        Math.abs(Math.sin(radians)) * body.height) *
+      (draggingRef.current !== null &&
+      bodiesRef.current[draggingRef.current] === body
+        ? 1.06
+        : 1) /
+      2;
+    const halfHeight =
+      (Math.abs(Math.sin(radians)) * body.width +
+        Math.abs(Math.cos(radians)) * body.height) *
+      (draggingRef.current !== null &&
+      bodiesRef.current[draggingRef.current] === body
+        ? 1.06
+        : 1) /
+      2;
+    const padding = 8;
+    const minimumX = padding + halfWidth - body.width / 2;
+    const minimumY = padding + halfHeight - body.height / 2;
+
+    return {
+      minimumX,
+      minimumY,
+      maximumX: Math.max(
+        minimumX,
+        (field?.clientWidth ?? body.width) - padding - halfWidth - body.width / 2,
+      ),
+      maximumY: Math.max(
+        minimumY,
+        (field?.clientHeight ?? body.height) - padding - halfHeight - body.height / 2,
+      ),
+    };
+  }, []);
+
+  const constrainBody = useCallback((body: Body, bounce = false) => {
+    const bounds = getBodyBounds(body);
+    if (body.x < bounds.minimumX) {
+      body.x = bounds.minimumX;
+      if (bounce && body.vx < 0) body.vx *= -0.24;
+    } else if (body.x > bounds.maximumX) {
+      body.x = bounds.maximumX;
+      if (bounce && body.vx > 0) body.vx *= -0.24;
+    }
+    if (body.y < bounds.minimumY) {
+      body.y = bounds.minimumY;
+      if (bounce && body.vy < 0) body.vy *= -0.24;
+    } else if (body.y > bounds.maximumY) {
+      body.y = bounds.maximumY;
+      if (bounce && body.vy > 0) body.vy *= -0.24;
+    }
+  }, [getBodyBounds]);
 
   const stopLoop = () => {
     if (frameRef.current !== null) {
@@ -143,12 +201,7 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
           body.vy *= scale;
         }
 
-        body.x = clamp(body.x, 8, Math.max(8, window.innerWidth - body.width - 8));
-        body.y = clamp(body.y, 8, Math.max(8, window.innerHeight - body.height - 8));
-        if (body.x <= 8 && body.vx < 0) body.vx *= -0.24;
-        if (body.x >= window.innerWidth - body.width - 8 && body.vx > 0) body.vx *= -0.24;
-        if (body.y <= 8 && body.vy < 0) body.vy *= -0.24;
-        if (body.y >= window.innerHeight - body.height - 8 && body.vy > 0) body.vy *= -0.24;
+        constrainBody(body, true);
         applyBodyTransform(index);
       }
 
@@ -209,6 +262,11 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
         }
       }
 
+      bodies.forEach((body, index) => {
+        constrainBody(body, true);
+        applyBodyTransform(index);
+      });
+
       const allBack = restoringRef.current && bodies.every((body) =>
         body.x === body.originX &&
         body.y === body.originY &&
@@ -221,6 +279,7 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
       }
 
       const hasMovement = activeIndex !== null ||
+        (!restoringRef.current && now - lastInteractionRef.current <= 2800) ||
         bodies.some((body) => Math.hypot(body.vx, body.vy) > 5 ||
           Math.abs(body.angularVelocity) > 0.02 ||
           (restoringRef.current && (
@@ -241,18 +300,23 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
     if (!field) return;
 
     const arrange = (forceReset = false) => {
-      const rect = field.getBoundingClientRect();
-      const compact = rect.width < 560;
-      const columns = compact ? 2 : rect.width < 900 ? 3 : 4;
-      const width = compact ? 132 : 150;
-      const height = compact ? 84 : 94;
+      field.style.height = "";
+      const baseRect = field.getBoundingClientRect();
+      const columns = baseRect.width < 560 ? 2 : baseRect.width < 900 ? 3 : 4;
+      const firstCard = cardRefs.current[0];
+      const width = firstCard?.offsetWidth ?? 150;
+      const height = firstCard?.offsetHeight ?? 94;
       const rows = Math.ceil(uniqueSkills.length / columns);
-      const gapX = compact ? 12 : 18;
-      const gapY = compact ? 16 : 18;
+      const gapX = columns === 2 ? 12 : 18;
+      const gapY = columns === 2 ? 16 : 18;
       const gridWidth = columns * width + (columns - 1) * gapX;
       const gridHeight = rows * height + (rows - 1) * gapY;
-      const left = rect.left + Math.max(8, (rect.width - gridWidth) / 2);
-      const top = rect.top + Math.max(24, (rect.height - gridHeight) / 2);
+      if (gridHeight + 48 > baseRect.height) {
+        field.style.height = `${gridHeight + 48}px`;
+      }
+      const rect = field.getBoundingClientRect();
+      const left = Math.max(8, (rect.width - gridWidth) / 2);
+      const top = Math.max(24, (rect.height - gridHeight) / 2);
 
       if (bodiesRef.current.length !== uniqueSkills.length) {
         bodiesRef.current = uniqueSkills.map((_, index) => {
@@ -274,6 +338,7 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
           };
         });
       } else {
+        const previousSize = fieldSizeRef.current;
         uniqueSkills.forEach((_, index) => {
           const body = bodiesRef.current[index];
           const previousOriginX = body.originX;
@@ -286,6 +351,12 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
           const row = Math.floor(index / columns);
           const x = left + column * (width + gapX);
           const y = top + row * (height + gapY);
+          if (previousSize) {
+            body.x *= rect.width / previousSize.width;
+            body.y *= rect.height / previousSize.height;
+            body.vx *= rect.width / previousSize.width;
+            body.vy *= rect.height / previousSize.height;
+          }
           body.width = width;
           body.height = height;
           body.originX = x;
@@ -297,32 +368,33 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
             body.vy = 0;
             body.angle = 0;
             body.angularVelocity = 0;
+          } else {
+            constrainBody(body);
           }
           applyBodyTransform(index);
         });
       }
 
+      fieldSizeRef.current = { width: rect.width, height: rect.height };
       bodiesRef.current.forEach((_, index) => applyBodyTransform(index));
     };
 
     const frame = window.requestAnimationFrame(() => arrange(true));
     const handleResize = () => arrange(false);
-    const handleScroll = () => arrange(false);
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
-    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
-      window.removeEventListener("scroll", handleScroll);
       stopLoop();
     };
-  }, [uniqueSkills]);
+  }, [uniqueSkills, constrainBody]);
 
   const startDrag = (index: number, event: ReactPointerEvent<HTMLButtonElement>) => {
     const body = bodiesRef.current[index];
-    if (!body) return;
+    const rect = fieldRef.current?.getBoundingClientRect();
+    if (!body || !rect) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       body.vx = 0;
       body.vy = 0;
@@ -331,8 +403,8 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
     draggingRef.current = index;
     lastInteractionRef.current = event.timeStamp;
     dragOffsetRef.current = {
-      x: event.clientX - body.x,
-      y: event.clientY - body.y,
+      x: event.clientX - rect.left - body.x,
+      y: event.clientY - rect.top - body.y,
     };
     pointerRef.current[index] = { point: { x: event.clientX, y: event.clientY }, time: event.timeStamp };
     velocityRef.current[index] = { x: 0, y: 0 };
@@ -347,7 +419,9 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
   const moveDrag = (index: number, event: ReactPointerEvent<HTMLButtonElement>) => {
     if (draggingRef.current !== index) return;
     const body = bodiesRef.current[index];
-    if (!body) return;
+    const field = fieldRef.current;
+    if (!body || !field) return;
+    const rect = field.getBoundingClientRect();
 
     const now = event.timeStamp;
     const previous = pointerRef.current[index];
@@ -363,15 +437,16 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
       time: now,
     };
 
+    const bounds = getBodyBounds(body);
     body.x = clamp(
-      event.clientX - dragOffsetRef.current.x,
-      8,
-      Math.max(8, window.innerWidth - body.width - 8),
+      event.clientX - rect.left - dragOffsetRef.current.x,
+      bounds.minimumX,
+      bounds.maximumX,
     );
     body.y = clamp(
-      event.clientY - dragOffsetRef.current.y,
-      8,
-      Math.max(8, window.innerHeight - body.height - 8),
+      event.clientY - rect.top - dragOffsetRef.current.y,
+      bounds.minimumY,
+      bounds.maximumY,
     );
     body.vx = 0;
     body.vy = 0;
@@ -417,8 +492,9 @@ export default function TechnologyField({ skills }: TechnologyFieldProps) {
     restoringRef.current = false;
     draggingRef.current = null;
     lastInteractionRef.current = event.timeStamp;
-    body.x = clamp(body.x + movement.x, 8, Math.max(8, window.innerWidth - body.width - 8));
-    body.y = clamp(body.y + movement.y, 8, Math.max(8, window.innerHeight - body.height - 8));
+    const bounds = getBodyBounds(body);
+    body.x = clamp(body.x + movement.x, bounds.minimumX, bounds.maximumX);
+    body.y = clamp(body.y + movement.y, bounds.minimumY, bounds.maximumY);
     body.vx = movement.x * 18;
     body.vy = movement.y * 18;
     applyBodyTransform(index);
