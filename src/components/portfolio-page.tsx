@@ -34,6 +34,14 @@ import ProjectPresentation from "@/components/project-presentation";
 import TechnologyField from "@/components/technology-field";
 import type { Project } from "@/types/portfolio";
 
+type ProjectCardMotion = {
+  frame: number;
+  pointerX: number;
+  pointerY: number;
+  strength: number;
+  target: number;
+};
+
 const navItems = [
   { id: "inicio", label: "Início" },
   { id: "sobre", label: "Sobre" },
@@ -83,6 +91,7 @@ export default function PortfolioPage() {
   const projectModalRef = useRef<HTMLDivElement>(null);
   const dialogReturnFocus = useRef<HTMLElement | null>(null);
   const closeProjectTimeout = useRef<number | null>(null);
+  const projectCardMotions = useRef(new Map<HTMLElement, ProjectCardMotion>());
   const projectPages = Array.from(
     { length: Math.ceil(projects.length / projectsPerPage) },
     (_, pageIndex) =>
@@ -94,6 +103,88 @@ export default function PortfolioPage() {
   const activeProjectPage = Math.min(
     projectPage,
     Math.max(0, projectPages.length - 1),
+  );
+
+  const updateProjectCardMotion = (
+    card: HTMLElement,
+    target: number,
+    clientX?: number,
+    clientY?: number,
+  ) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let motion = projectCardMotions.current.get(card);
+    if (!motion) {
+      motion = { frame: 0, pointerX: 0, pointerY: 0, strength: 0, target };
+      projectCardMotions.current.set(card, motion);
+    }
+    const cardMotion = motion;
+
+    cardMotion.target = target;
+    card.style.transition =
+      "opacity 700ms cubic-bezier(.2, .65, .3, 1), box-shadow 600ms cubic-bezier(0.22, 1, 0.36, 1), border-color 600ms ease, background 600ms ease";
+    if (clientX !== undefined && clientY !== undefined) {
+      const bounds = card.getBoundingClientRect();
+      cardMotion.pointerX = Math.max(
+        -1,
+        Math.min(1, ((clientX - bounds.left) / bounds.width) * 2 - 1),
+      );
+      cardMotion.pointerY = Math.max(
+        -1,
+        Math.min(1, ((clientY - bounds.top) / bounds.height) * 2 - 1),
+      );
+    }
+
+    if (cardMotion.frame) return;
+
+    const animate = (timestamp: number) => {
+      cardMotion.strength += (cardMotion.target - cardMotion.strength) * 0.08;
+      if (Math.abs(cardMotion.target - cardMotion.strength) < 0.05) {
+        cardMotion.strength = cardMotion.target;
+      }
+
+      const strength = cardMotion.strength;
+      const lift = (-4.5 + Math.sin(timestamp / 550) * 1.5) * strength;
+      const rotateX = -cardMotion.pointerY * 2.5 * strength;
+      const rotateY = cardMotion.pointerX * 2.5 * strength;
+      card.style.transform = `translate3d(0, ${lift}px, 0) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+      if (cardMotion.target > 0 || strength > 0.001) {
+        cardMotion.frame = window.requestAnimationFrame(animate);
+      } else {
+        cardMotion.frame = 0;
+        card.style.removeProperty("transform");
+        card.style.removeProperty("transition");
+        projectCardMotions.current.delete(card);
+      }
+    };
+
+    cardMotion.frame = window.requestAnimationFrame(animate);
+  };
+
+  const resetProjectCardMotion = (card: HTMLElement) => {
+    const motion = projectCardMotions.current.get(card);
+    if (motion?.frame) window.cancelAnimationFrame(motion.frame);
+    projectCardMotions.current.delete(card);
+    card.style.removeProperty("transform");
+    card.style.removeProperty("transition");
+  };
+
+  const handleProjectOpen = (project: Project, card: HTMLElement) => {
+    resetProjectCardMotion(card);
+    openProject(project, card);
+  };
+
+  useEffect(
+    () => () => {
+      projectCardMotions.current.forEach((motion, card) => {
+        if (motion.frame) window.cancelAnimationFrame(motion.frame);
+        card.style.removeProperty("transform");
+        card.style.removeProperty("transition");
+      });
+      projectCardMotions.current.clear();
+    },
+    [],
   );
 
   const openProject = (project: Project, card: HTMLElement) => {
@@ -548,11 +639,34 @@ export default function PortfolioPage() {
                           tabIndex={0}
                           aria-haspopup="dialog"
                           aria-label={`Ver detalhes do projeto ${project.name}`}
-                          onClick={(event) => openProject(project, event.currentTarget)}
+                          onPointerEnter={(event) => {
+                            if (event.pointerType === "touch") return;
+                            updateProjectCardMotion(
+                              event.currentTarget,
+                              1,
+                              event.clientX,
+                              event.clientY,
+                            );
+                          }}
+                          onPointerMove={(event) => {
+                            if (event.pointerType === "touch") return;
+                            updateProjectCardMotion(
+                              event.currentTarget,
+                              1,
+                              event.clientX,
+                              event.clientY,
+                            );
+                          }}
+                          onPointerLeave={(event) =>
+                            updateProjectCardMotion(event.currentTarget, 0)
+                          }
+                          onClick={(event) =>
+                            handleProjectOpen(project, event.currentTarget)
+                          }
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              openProject(project, event.currentTarget);
+                              handleProjectOpen(project, event.currentTarget);
                             }
                           }}
                         >

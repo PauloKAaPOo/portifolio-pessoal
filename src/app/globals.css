@@ -382,13 +382,13 @@ a { color: inherit; text-decoration: none; }
 .project-carousel-shell { position: relative; padding: 0 28px; }
 .project-viewport { overflow: hidden; touch-action: pan-y; }
 .project-track { display: flex; width: 100%; transition: transform .6s cubic-bezier(.2, .75, .25, 1); }
-.project-page { display: grid; flex: 0 0 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; perspective: 900px; }
+.project-page { display: grid; flex: 0 0 100%; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; perspective: 900px; }
 .project-card {
   position: relative;
   min-width: 0;
   overflow: hidden;
   border: 1px solid transparent;
-  border-radius: 22px;
+  border-radius: 28px;
   transform-style: preserve-3d;
   background:
     linear-gradient(160deg, color-mix(in srgb, var(--terracotta) 5%, var(--surface)), var(--surface) 42%) padding-box,
@@ -400,10 +400,12 @@ a { color: inherit; text-decoration: none; }
     ) border-box;
   box-shadow: 0 12px 34px color-mix(in srgb, var(--graphite) 9%, transparent);
   cursor: pointer;
-  transition: all 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    box-shadow 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 600ms ease,
+    background 600ms ease;
 }
 .project-card:focus-visible {
-  transform: translateY(-6px) scale(1.015);
   background:
     linear-gradient(160deg, color-mix(in srgb, var(--terracotta) 8%, var(--surface)), var(--surface) 42%) padding-box,
     linear-gradient(135deg, var(--terracotta), color-mix(in srgb, var(--terracotta) 55%, var(--wine))) border-box;
@@ -414,44 +416,57 @@ a { color: inherit; text-decoration: none; }
 .project-card:focus-visible { outline: 2px solid var(--accent-foreground); outline-offset: 3px; }
 .project-visual {
   position: relative;
-  height: 180px;
+  height: 140px;
+  margin: 10px 10px 0;
+  overflow: hidden;
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: 12px;
+  gap: 8px;
   background:
     radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--terracotta) 16%, transparent), transparent 28%),
     var(--surface-soft);
   color: var(--primary);
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 18px;
 }
 .project-visual::after {
   position: absolute;
-  inset: 12px;
+  inset: 8px;
   border: 1px solid color-mix(in srgb, var(--wine) 16%, transparent);
-  border-radius: 14px;
+  border-radius: 12px;
   content: "";
   pointer-events: none;
 }
 .project-visual span { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
-.window-dots { position: absolute; top: 16px; left: 16px; display: flex; gap: 6px; }
+.window-dots { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
 .window-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--terracotta); }
 .window-dots i:nth-child(2) { background: var(--burnt); }
 .window-dots i:nth-child(3) { background: var(--wine); }
-.project-content { padding: 20px; }
-.project-status { display: inline-block; margin-bottom: 9px; border-radius: 999px; background: var(--primary); padding: 5px 9px; color: var(--sand); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+.project-content { padding: 16px 18px; }
+.project-status { display: inline-block; margin-bottom: 7px; border-radius: 999px; background: var(--primary); padding: 4px 8px; color: var(--sand); font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .project-content h3, .skill-card h3, .timeline-card h3, .certificate-card h3, .hobby-card h3 { margin: 0; }
-.project-content h3 { font-family: var(--font-display); font-size: 20px; line-height: 1.2; }
-.project-category { display: block; margin-top: 5px; color: var(--terracotta); font-size: 11px; font-weight: 800; }
-.project-content > p { min-height: 44px; margin: 10px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.65; }
-.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.project-content h3 { font-family: var(--font-display); font-size: 1.05rem; line-height: 1.2; }
+.project-category { display: block; margin-top: 4px; color: var(--terracotta); font-size: 10px; font-weight: 800; }
+.project-content > p {
+  display: -webkit-box;
+  min-height: 0;
+  margin: 8px 0 10px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.tag-list { display: flex; flex-wrap: wrap; gap: 4px; }
 .tag-list span {
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface-soft);
-  padding: 6px 9px;
+  padding: 4px 7px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
 }
 .text-link { border: 0; background: transparent; color: var(--primary); padding: 16px 0 0; font-size: 12px; font-weight: 900; }
@@ -724,8 +739,8 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   .portrait-wrap { width: 78%; max-width: 340px; justify-self: center; }
   .chip-one { left: -24px; }
   .chip-two { right: -20px; }
-  .project-content { padding: clamp(16px, 5vw, 24px); }
-  .project-visual { height: clamp(150px, 48vw, 180px); }
+  .project-content { padding: 16px 18px; }
+  .project-visual { height: 140px; }
   .project-page { grid-template-columns: 1fr; }
   .skills-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .hobbies-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -770,7 +785,6 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
 @media (hover: hover) and (pointer: fine) {
   .project-card:not(.is-selected):hover {
     z-index: 1;
-    animation: card-float-tilt 2.9s ease-in-out infinite alternate;
     background:
       linear-gradient(160deg, color-mix(in srgb, var(--terracotta) 8%, var(--surface)), var(--surface) 42%) padding-box,
       linear-gradient(135deg, var(--terracotta), color-mix(in srgb, var(--terracotta) 55%, var(--wine))) border-box;
@@ -784,11 +798,6 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   .button:hover { transform: translateY(-2px); }
   .button-primary:hover { background: var(--primary-light); }
   .social-row a:hover { color: var(--primary); }
-}
-
-@keyframes card-float-tilt {
-  from { transform: rotateX(-3.5deg) rotateY(4deg) translateY(-6px); }
-  to { transform: rotateX(3.5deg) rotateY(-4deg) translateY(-8px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
