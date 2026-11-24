@@ -543,7 +543,7 @@ export default function PortfolioPage() {
                       {pageProjects.map((project) => (
                         <article
                           className={`project-card${selectedProject?.id === project.id ? " is-selected" : ""}`}
-                          key={project.name}
+                          key={project.id}
                           role="button"
                           tabIndex={0}
                           aria-haspopup="dialog"

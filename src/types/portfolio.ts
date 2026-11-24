@@ -13,7 +13,7 @@ export type Project = {
   technologies: string[];
   features: string[];
   participation: string;
-  slides: ProjectSlide[];
+  slides: [ProjectSlide, ProjectSlide, ProjectSlide];
   status: "Em desenvolvimento" | "Concluído";
   repositoryUrl?: string;
   demoUrl?: string;
