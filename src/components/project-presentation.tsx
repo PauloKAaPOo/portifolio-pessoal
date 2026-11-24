@@ -65,7 +65,7 @@ export default function ProjectPresentation({
         },
         {
           transformOrigin: "center center",
-          transform: "translate(0, 0) scale(1) rotate(360deg)",
+          transform: "translate(0, 0) scale(1) rotateY(360deg)",
           borderRadius: "18px",
         },
       ],
