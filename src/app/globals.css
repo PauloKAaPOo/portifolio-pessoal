@@ -387,9 +387,9 @@ a { color: inherit; text-decoration: none; }
   min-width: 0;
   overflow: hidden;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 24px;
   background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(160deg, color-mix(in srgb, var(--terracotta) 5%, var(--surface)), var(--surface) 42%) padding-box,
     linear-gradient(
       135deg,
       color-mix(in srgb, var(--wine) 32%, var(--line)),
@@ -398,13 +398,16 @@ a { color: inherit; text-decoration: none; }
     ) border-box;
   box-shadow: 0 12px 34px color-mix(in srgb, var(--graphite) 9%, transparent);
   cursor: pointer;
-  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  transition: all 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .project-card:focus-visible {
-  transform: translateY(-4px);
+  transform: translateY(-6px) scale(1.015);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--terracotta) 8%, var(--surface)), var(--surface) 42%) padding-box,
+    linear-gradient(135deg, var(--terracotta), color-mix(in srgb, var(--terracotta) 55%, var(--wine))) border-box;
   box-shadow:
-    0 16px 36px color-mix(in srgb, var(--graphite) 12%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+    0 22px 48px color-mix(in srgb, var(--graphite) 17%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--terracotta) 35%, transparent);
 }
 .project-card:focus-visible { outline: 2px solid var(--accent-foreground); outline-offset: 3px; }
 .project-visual {
@@ -424,6 +427,7 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   inset: 12px;
   border: 1px solid color-mix(in srgb, var(--wine) 16%, transparent);
+  border-radius: 14px;
   content: "";
   pointer-events: none;
 }
@@ -432,12 +436,12 @@ a { color: inherit; text-decoration: none; }
 .window-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--terracotta); }
 .window-dots i:nth-child(2) { background: var(--burnt); }
 .window-dots i:nth-child(3) { background: var(--wine); }
-.project-content { padding: 24px; }
+.project-content { padding: 26px; }
 .project-status { display: inline-block; margin-bottom: 12px; border-radius: 999px; background: var(--primary); padding: 5px 9px; color: var(--sand); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .project-content h3, .skill-card h3, .timeline-card h3, .certificate-card h3, .hobby-card h3 { margin: 0; }
-.project-content h3 { font-family: var(--font-display); font-size: 22px; }
+.project-content h3 { font-family: var(--font-display); font-size: 22px; line-height: 1.2; }
 .project-category { display: block; margin-top: 6px; color: var(--terracotta); font-size: 11px; font-weight: 800; }
-.project-content > p { min-height: 48px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.project-content > p { min-height: 48px; margin: 14px 0 18px; color: var(--muted); font-size: 14px; line-height: 1.7; }
 .tag-list { display: flex; flex-wrap: wrap; gap: 7px; }
 .tag-list span {
   border: 1px solid var(--line);
@@ -449,7 +453,10 @@ a { color: inherit; text-decoration: none; }
   font-weight: 800;
 }
 .text-link { border: 0; background: transparent; color: var(--primary); padding: 16px 0 0; font-size: 12px; font-weight: 900; }
-.project-content .text-link { display: inline-block; }
+.project-content .text-link { display: inline-block; transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); }
+.project-card:hover .text-link span,
+.project-card:focus-visible .text-link span { display: inline-block; transform: translateX(4px); }
+.project-content .text-link span { transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); }
 .project-card.is-selected { visibility: hidden; }
 .carousel-arrow {
   position: absolute;
@@ -760,10 +767,13 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
 
 @media (hover: hover) and (pointer: fine) {
   .project-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px) scale(1.015);
+    background:
+      linear-gradient(160deg, color-mix(in srgb, var(--terracotta) 8%, var(--surface)), var(--surface) 42%) padding-box,
+      linear-gradient(135deg, var(--terracotta), color-mix(in srgb, var(--terracotta) 55%, var(--wine))) border-box;
     box-shadow:
-      0 18px 40px color-mix(in srgb, var(--graphite) 13%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--terracotta) 16%, transparent);
+      0 22px 48px color-mix(in srgb, var(--graphite) 17%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--terracotta) 35%, transparent);
   }
   .skill-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--terracotta) 60%, var(--line)); box-shadow: 0 12px 30px color-mix(in srgb, var(--wine) 12%, transparent); }
   .skill-card:hover .skill-logo { box-shadow: 0 6px 16px color-mix(in srgb, var(--terracotta) 14%, transparent); }
@@ -823,7 +833,6 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   box-shadow: 0 24px 60px color-mix(in srgb, var(--coffee) 22%, transparent);
   scrollbar-color: var(--sand) transparent;
 }
-.project-information.is-closing { opacity: 0; }
 .project-information-content { min-width: 0; }
 .project-back-button {
   display: inline-flex;
@@ -897,7 +906,7 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   box-shadow: 0 24px 60px color-mix(in srgb, var(--coffee) 22%, transparent);
   animation: gallery-panel-in .55s .18s cubic-bezier(.22, 1, .36, 1) both;
 }
-.project-gallery.is-closing { animation: gallery-panel-out .38s ease both; }
+.project-gallery.is-closing { animation: gallery-panel-out .2s ease both; }
 .project-gallery-heading { position: relative; z-index: 1; }
 .project-gallery-slide {
   position: relative;
@@ -1020,9 +1029,6 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
 .gallery-thumbnail:hover, .gallery-thumbnail.is-active { border-color: var(--primary); background: var(--primary); color: var(--sand); }
 .gallery-thumbnail.is-active .gallery-thumbnail-index { color: var(--sand); }
 .gallery-thumbnail.is-active .gallery-thumbnail-preview { background: color-mix(in srgb, var(--sand) 16%, var(--primary)); color: var(--sand); }
-.project-viewport:has(.project-card.is-selected) .project-card:not(.is-selected) {
-  animation: project-neighbors-out .48s .08s ease both;
-}
 :root.dark .button-primary { background: var(--primary); }
 :root.dark .button-primary:hover { background: var(--primary-light); }
 @keyframes gallery-slide-in {
@@ -1044,10 +1050,6 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
 @keyframes gallery-panel-out {
   to { opacity: 0; transform: translateY(10px); }
 }
-@keyframes project-neighbors-out {
-  to { opacity: 0; transform: scale(.96); }
-}
-
 @media (max-width: 980px) {
   .project-presentation { grid-template-columns: 1fr; max-height: none; overflow: visible; }
   .project-information { min-height: 0; max-height: none; }
@@ -1086,8 +1088,7 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   .project-gallery,
   .project-gallery-slide,
   .gallery-thumbnails,
-  .project-slide-summary,
-  .project-viewport:has(.project-card.is-selected) .project-card:not(.is-selected) {
+  .project-slide-summary {
     animation: none !important;
   }
   .technology-item { transition: none !important; }
