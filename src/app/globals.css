@@ -799,8 +799,12 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
   display: grid;
   grid-template-columns: minmax(0, 38fr) minmax(0, 58fr);
   align-items: stretch;
-  gap: clamp(24px, 2.4vw, 32px);
+  gap: clamp(32px, 3vw, 48px);
   overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   animation: none;
 }
 .project-presentation.is-closing { animation: none; }
