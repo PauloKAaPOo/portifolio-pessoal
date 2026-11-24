@@ -40,46 +40,53 @@ export default function ProjectPresentation({
   onGalleryIndexChange,
 }: ProjectPresentationProps) {
   const animationRef = useRef<Animation | null>(null);
+  const informationRef = useRef<HTMLElement>(null);
   const swipeStartX = useRef<number | null>(null);
-  const images = project.images;
-  const activeImage = images[galleryIndex];
+  const slides = project.slides;
+  const activeSlide = slides[galleryIndex];
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog || !origin || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const information = informationRef.current;
+    if (
+      !information ||
+      !origin ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
       return;
     }
 
-    const bounds = dialog.getBoundingClientRect();
-    const isMobile = window.matchMedia("(max-width: 720px)").matches;
-    animationRef.current = dialog.animate(
-      isMobile
-        ? [
-            { opacity: 0, transform: "translateY(14px) scale(.98)" },
-            { opacity: 1, transform: "translateY(0) scale(1)" },
-          ]
-        : [
-            {
-              transformOrigin: "top left",
-              transform: `translate(${origin.left - bounds.left}px, ${origin.top - bounds.top}px) scale(${origin.width / bounds.width}, ${origin.height / bounds.height})`,
-              borderRadius: "10px",
-            },
-            { transformOrigin: "top left", transform: "translate(0, 0) scale(1, 1)", borderRadius: "14px" },
-          ],
-      { duration: 540, easing: "cubic-bezier(.2, .75, .25, 1)", fill: "both" },
+    const bounds = information.getBoundingClientRect();
+    animationRef.current = information.animate(
+      [
+        {
+          transformOrigin: "center center",
+          transform: `translate(${origin.left - bounds.left}px, ${origin.top - bounds.top}px) scale(${origin.width / bounds.width}, ${origin.height / bounds.height}) rotate(0deg)`,
+          borderRadius: "10px",
+        },
+        {
+          transformOrigin: "center center",
+          transform: "translate(0, 0) scale(1) rotate(360deg)",
+          borderRadius: "18px",
+        },
+      ],
+      {
+        duration: 750,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        fill: "both",
+      },
     );
 
     return () => animationRef.current?.cancel();
-  }, [dialogRef, origin]);
+  }, [origin]);
 
   useEffect(() => {
     if (!isClosing) return;
     animationRef.current?.reverse();
   }, [isClosing]);
 
-  const showImage = (index: number) => {
-    if (!images.length) return;
-    onGalleryIndexChange((index + images.length) % images.length);
+  const showSlide = (index: number) => {
+    if (!slides.length) return;
+    onGalleryIndexChange((index + slides.length) % slides.length);
   };
 
   const handleTouchStart = (event: TouchEvent<HTMLElement>) => {
@@ -90,8 +97,10 @@ export default function ProjectPresentation({
     const startX = swipeStartX.current;
     const endX = event.changedTouches[0]?.clientX;
     swipeStartX.current = null;
-    if (startX === null || endX === undefined || Math.abs(startX - endX) < 45) return;
-    showImage(galleryIndex + (startX > endX ? 1 : -1));
+    if (startX === null || endX === undefined || Math.abs(startX - endX) < 45) {
+      return;
+    }
+    showSlide(galleryIndex + (startX > endX ? 1 : -1));
   };
 
   return (
@@ -105,59 +114,89 @@ export default function ProjectPresentation({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="project-modal-title"
+        aria-labelledby="project-project-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <section className={`project-information${isClosing ? " is-closing" : ""}`}>
-          <button className="modal-close" onClick={onClose} aria-label="Fechar apresentação">
-            <X size={19} />
+        <section
+          className={`project-information${isClosing ? " is-closing" : ""}`}
+          ref={informationRef}
+        >
+          <button
+            className="project-back-button"
+            type="button"
+            onClick={onClose}
+            aria-label="Voltar aos projetos"
+          >
+            <X size={17} />
+            <span>Voltar aos projetos</span>
           </button>
-          <span className="eyebrow">{project.category} · {project.status}</span>
-          <h2 id="project-modal-title">{project.name}</h2>
-          <p className="project-presentation-description">{project.description}</p>
-          <div className="project-details">
-            <div>
-              <b>Objetivo</b>
-              <p>{project.objective}</p>
+          <div className="project-information-content" aria-live="polite">
+            <div className="project-context">
+              <span className="eyebrow">{project.category}</span>
+              <span className="project-status-badge">{project.status}</span>
             </div>
-            <div>
-              <b>Participação</b>
-              <p>{project.participation}</p>
-            </div>
-            <div>
-              <b>Funcionalidades</b>
-              <ul>{project.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
-            </div>
-            <div>
-              <b>Tecnologias</b>
-              <div className="project-technology-list">
-                {project.technologies.map((technology) => (
-                  <span className="project-technology" key={technology}>
-                    <span className="technology-mark" aria-hidden="true">
-                      {(technologyIcons[technology] ?? []).length ? (
-                        technologyIcons[technology].map((icon) => (
-                          <svg key={icon.slug} viewBox="0 0 24 24">
-                            <path d={icon.path} />
-                          </svg>
-                        ))
-                      ) : (
-                        technology === "Java" ? <Coffee size={14} /> : <Code2 size={14} />
-                      )}
-                    </span>
-                    {technology}
-                  </span>
-                ))}
+            <h2 id="project-project-title">{project.name}</h2>
+            <span className="project-step-index">
+              ETAPA {String(galleryIndex + 1).padStart(2, "0")} DE{" "}
+              {String(slides.length).padStart(2, "0")}
+            </span>
+            {activeSlide && (
+              <div className="project-slide-summary" key={galleryIndex}>
+                <h3>{activeSlide.tituloEtapa}</h3>
+                <div className="project-details">
+                  <div>
+                    <b>O que esta tela representa</b>
+                    <p>{activeSlide.oQueRepresenta}</p>
+                  </div>
+                  <div>
+                    <b>Como funciona</b>
+                    <p>{activeSlide.comoFunciona}</p>
+                  </div>
+                  <div>
+                    <b>Tecnologias desta etapa</b>
+                    <div className="project-technology-list">
+                      {activeSlide.tecnologias.map((technology) => (
+                        <span className="project-technology" key={technology}>
+                          <span className="technology-mark" aria-hidden="true">
+                            {(technologyIcons[technology] ?? []).length ? (
+                              technologyIcons[technology].map((icon) => (
+                                <svg key={icon.slug} viewBox="0 0 24 24">
+                                  <path d={icon.path} />
+                                </svg>
+                              ))
+                            ) : technology === "Java" ? (
+                              <Coffee size={14} />
+                            ) : (
+                              <Code2 size={14} />
+                            )}
+                          </span>
+                          {technology}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-          <div className="modal-actions">
+          <div className="project-summary-links">
             {project.repositoryUrl && (
-              <a className="button button-primary" href={project.repositoryUrl} target="_blank" rel="noreferrer">
+              <a
+                className="button button-primary"
+                href={project.repositoryUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <ExternalLink size={17} /> Repositório
               </a>
             )}
             {project.demoUrl && (
-              <a className="button button-secondary" href={project.demoUrl} target="_blank" rel="noreferrer">
+              <a
+                className="button button-secondary"
+                href={project.demoUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <ExternalLink size={17} /> Demonstração
               </a>
             )}
@@ -172,62 +211,95 @@ export default function ProjectPresentation({
         >
           <div className="project-gallery-heading">
             <span>Galeria de telas</span>
-            <span>{activeImage ? `${String(galleryIndex + 1).padStart(2, "0")} / ${String(images.length).padStart(2, "0")}` : "Sem capturas"}</span>
+            <span>
+              {String(galleryIndex + 1).padStart(2, "0")} /{" "}
+              {String(slides.length).padStart(2, "0")}
+            </span>
           </div>
-          {activeImage ? (
+          {activeSlide ? (
             <>
-              <div className="project-gallery-slide" key={activeImage.id} aria-live="polite">
+              <div className="project-gallery-slide" key={galleryIndex}>
                 <div className="project-gallery-image">
-                  <Image
-                    src={activeImage.image}
-                    alt={activeImage.title}
-                    fill
-                    sizes="(max-width: 720px) 100vw, 55vw"
-                  />
+                  {activeSlide.imagem ? (
+                    <Image
+                      src={activeSlide.imagem}
+                      alt={activeSlide.tituloEtapa}
+                      fill
+                      sizes="(max-width: 980px) 100vw, 58vw"
+                    />
+                  ) : (
+                    <div className="project-slide-placeholder">
+                      <div className="project-slide-placeholder-window">
+                        <span />
+                        <span />
+                        <span />
+                        <Code2 size={30} aria-hidden="true" />
+                      </div>
+                      <span className="project-slide-placeholder-label">
+                        Captura real não cadastrada
+                      </span>
+                      <strong>{activeSlide.tituloEtapa}</strong>
+                    </div>
+                  )}
                 </div>
                 <div className="project-gallery-caption">
-                  <h3>{activeImage.title}</h3>
-                  <p>{activeImage.description}</p>
+                  <h3>{activeSlide.tituloEtapa}</h3>
+                  <p>{activeSlide.oQueRepresenta}</p>
                 </div>
               </div>
-              {images.length > 1 && (
-                <>
+              <button
+                className="gallery-arrow gallery-arrow-previous"
+                type="button"
+                aria-label="Tela anterior"
+                onClick={() => showSlide(galleryIndex - 1)}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                className="gallery-arrow gallery-arrow-next"
+                type="button"
+                aria-label="Próxima tela"
+                onClick={() => showSlide(galleryIndex + 1)}
+              >
+                <ChevronRight size={20} />
+              </button>
+              <div className="gallery-thumbnails" aria-label="Selecionar etapa">
+                {slides.map((slide, index) => (
                   <button
-                    className="gallery-arrow gallery-arrow-previous"
+                    key={`${slide.tituloEtapa}-${index}`}
+                    className={`gallery-thumbnail${index === galleryIndex ? " is-active" : ""}`}
                     type="button"
-                    aria-label="Tela anterior"
-                    onClick={() => showImage(galleryIndex - 1)}
+                    aria-label={`Mostrar etapa ${index + 1}: ${slide.tituloEtapa}`}
+                    aria-current={index === galleryIndex ? "true" : undefined}
+                    onClick={() => showSlide(index)}
                   >
-                    <ChevronLeft size={20} />
+                    <span className="gallery-thumbnail-preview" aria-hidden="true">
+                      {slide.imagem ? (
+                        <Image
+                          src={slide.imagem}
+                          alt=""
+                          width={64}
+                          height={42}
+                        />
+                      ) : (
+                        <Code2 size={13} />
+                      )}
+                    </span>
+                    <span className="gallery-thumbnail-index">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <b>{slide.tituloEtapa}</b>
                   </button>
-                  <button
-                    className="gallery-arrow gallery-arrow-next"
-                    type="button"
-                    aria-label="Próxima tela"
-                    onClick={() => showImage(galleryIndex + 1)}
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                  <div className="gallery-pagination" aria-label="Selecionar tela">
-                    {images.map((image, index) => (
-                      <button
-                        key={image.id}
-                        className={index === galleryIndex ? "is-active" : ""}
-                        type="button"
-                        aria-label={`Mostrar tela ${index + 1}: ${image.title}`}
-                        aria-current={index === galleryIndex ? "true" : undefined}
-                        onClick={() => showImage(index)}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
+                ))}
+              </div>
             </>
           ) : (
             <div className="project-gallery-empty">
-              <div className="project-gallery-empty-icon"><Code2 size={30} /></div>
-              <h3>Capturas ainda não cadastradas</h3>
-              <p>Adicione as telas reais deste projeto em <code>src/data/portfolio.ts</code> e salve os arquivos em <code>public/images/projects/</code>.</p>
+              <div className="project-gallery-empty-icon">
+                <Code2 size={30} />
+              </div>
+              <h3>Nenhuma etapa cadastrada</h3>
+              <p>Adicione três etapas em <code>src/data/portfolio.ts</code>.</p>
             </div>
           )}
         </section>

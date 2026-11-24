@@ -126,7 +126,7 @@ export default function PortfolioPage() {
       setProjectOrigin(null);
       setIsClosingProject(false);
       closeProjectTimeout.current = null;
-    }, 540);
+    }, 750);
   }, [selectedProject]);
 
   useEffect(() => {
@@ -192,6 +192,18 @@ export default function PortfolioPage() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeProject();
+        return;
+      }
+
+      if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        event.preventDefault();
+        const slideCount = selectedProject.slides.length;
+        if (slideCount > 0) {
+          setProjectGalleryIndex((current) =>
+            (current + (event.key === "ArrowRight" ? 1 : -1) + slideCount) %
+            slideCount,
+          );
+        }
         return;
       }
 
@@ -472,7 +484,7 @@ export default function PortfolioPage() {
         <section id="projetos" className="section section-alt">
           <div className="container">
             <SectionHeading
-              eyebrow="03 — Portfólio"
+              eyebrow="02 — Portfólio"
               title="Projetos"
               description="Seleção de soluções acadêmicas e práticas, com destaque para complexidade técnica e aprendizado."
             />

@@ -13,17 +13,18 @@ export type Project = {
   technologies: string[];
   features: string[];
   participation: string;
-  images: ProjectImage[];
+  slides: ProjectSlide[];
   status: "Em desenvolvimento" | "Concluído";
   repositoryUrl?: string;
   demoUrl?: string;
 };
 
-export type ProjectImage = {
-  id: string;
-  image: string;
-  title: string;
-  description: string;
+export type ProjectSlide = {
+  imagem: string | null;
+  tituloEtapa: string;
+  oQueRepresenta: string;
+  comoFunciona: string;
+  tecnologias: string[];
 };
 
 export type Skill = {

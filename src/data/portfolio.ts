@@ -43,7 +43,35 @@ export const projects: Project[] = [
     ],
     participation:
       "Atuação no desenvolvimento da solução, integração de reconhecimento facial e organização dos dados.",
-    images: [],
+    slides: [
+      {
+        imagem: null,
+        tituloEtapa: "Cadastro e identificação da liga",
+        oQueRepresenta:
+          "A organização das ligas e dos participantes que poderão registrar presença nas reuniões.",
+        comoFunciona:
+          "A equipe administrativa mantém os dados da liga e dos participantes; esses registros dão contexto às reuniões e às consultas de presença.",
+        tecnologias: ["Python", "PostgreSQL"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Reconhecimento facial",
+        oQueRepresenta:
+          "A etapa de identificação do participante por meio da captura e análise facial.",
+        comoFunciona:
+          "A captura é processada para gerar embeddings, que são comparados com os registros cadastrados para apoiar o reconhecimento do participante.",
+        tecnologias: ["Python", "InsightFace", "pgvector"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Reuniões e registros de presença",
+        oQueRepresenta:
+          "O acompanhamento de reuniões e das presenças associadas a cada liga.",
+        comoFunciona:
+          "Os registros de presença ficam relacionados à reunião e à liga, permitindo que a equipe consulte o histórico e acompanhe os participantes.",
+        tecnologias: ["PostgreSQL", "pgvector", "Docker"],
+      },
+    ],
     status: "Em desenvolvimento",
   },
   {
@@ -64,7 +92,35 @@ export const projects: Project[] = [
     ],
     participation:
       "Participei do planejamento e desenvolvimento da solução, definição de requisitos e funcionalidades, estruturação de casos de uso, elaboração do diagrama de classes e modelagem do banco de dados.",
-    images: [],
+    slides: [
+      {
+        imagem: null,
+        tituloEtapa: "Exploração de oportunidades",
+        oQueRepresenta:
+          "A entrada da plataforma, voltada à descoberta de programas de especialização, mestrado e doutorado.",
+        comoFunciona:
+          "A pessoa inicia a busca e informa critérios para encontrar oportunidades acadêmicas organizadas na plataforma.",
+        tecnologias: ["Java", "Spring Boot"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Busca e comparação de programas",
+        oQueRepresenta:
+          "A consulta aos programas e instituições encontrados de acordo com os critérios escolhidos.",
+        comoFunciona:
+          "Os dados estruturados de instituições e programas ajudam a filtrar resultados e comparar oportunidades nacionais e internacionais.",
+        tecnologias: ["Java", "Spring Boot", "MySQL"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Organização acadêmica",
+        oQueRepresenta:
+          "As informações de uma instituição e seus programas reunidas para apoiar a avaliação de uma oportunidade.",
+        comoFunciona:
+          "A plataforma relaciona instituições a programas de pós-graduação e centraliza os dados relevantes para a consulta.",
+        tecnologias: ["Java", "MySQL", "SQL"],
+      },
+    ],
     status: "Em desenvolvimento",
   },
   {
@@ -85,7 +141,35 @@ export const projects: Project[] = [
     ],
     participation:
       "Desenvolvimento solo da proposta e da plataforma, integrando recursos de estudo, prática de programação e assistência inteligente. O escopo atual é focado exclusivamente em Java.",
-    images: [],
+    slides: [
+      {
+        imagem: null,
+        tituloEtapa: "Trilha de estudos",
+        oQueRepresenta:
+          "A organização dos conteúdos e questões para estudar e revisar fundamentos de Java.",
+        comoFunciona:
+          "A pessoa escolhe um tópico, consulta o material e usa o banco de questões para praticar e reforçar o conteúdo.",
+        tecnologias: ["Java", "Spring Boot", "MySQL"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Prática de programação",
+        oQueRepresenta:
+          "O espaço de exercício de código Java integrado à experiência de aprendizagem.",
+        comoFunciona:
+          "O estudante escreve e testa soluções no ambiente de prática, conectando os conceitos estudados à implementação.",
+        tecnologias: ["Java", "Spring Boot"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Assistência de IA",
+        oQueRepresenta:
+          "O apoio inteligente disponível durante o estudo e a prática de Java.",
+        comoFunciona:
+          "O agente integrado com Ollama auxilia o estudante com dúvidas enquanto teoria, questões e código permanecem no mesmo fluxo.",
+        tecnologias: ["Java", "Ollama", "MySQL"],
+      },
+    ],
     status: "Em desenvolvimento",
   },
   {
@@ -106,7 +190,32 @@ export const projects: Project[] = [
     ],
     participation:
       "Desenvolvimento individual com foco em abstração, organização de classes e controle de estados.",
-    images: [],
+    slides: [
+      {
+        imagem: null,
+        tituloEtapa: "Cadastro de reservas",
+        oQueRepresenta: "A criação de reservas e o registro de seus dados principais.",
+        comoFunciona:
+          "As entidades e seus construtores organizam os dados necessários antes da aplicação das regras de negócio.",
+        tecnologias: ["Java", "POO"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Validação de regras",
+        oQueRepresenta: "A verificação das condições necessárias para gerenciar uma reserva.",
+        comoFunciona:
+          "As regras e validações controlam as operações e usam estados definidos para manter o comportamento consistente.",
+        tecnologias: ["Java", "Enums"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Histórico e estados",
+        oQueRepresenta: "A consulta ao histórico e ao estado atual das reservas.",
+        comoFunciona:
+          "As coleções reúnem os registros e permitem acompanhar a evolução de cada reserva.",
+        tecnologias: ["Java", "Coleções", "Enums"],
+      },
+    ],
     status: "Em desenvolvimento",
   },
   {
@@ -127,7 +236,32 @@ export const projects: Project[] = [
     ],
     participation:
       "Implementação dos exercícios para evoluir fundamentos de Java e organização de código.",
-    images: [],
+    slides: [
+      {
+        imagem: null,
+        tituloEtapa: "Cadastro de alunos",
+        oQueRepresenta: "O registro e a organização de dados de alunos.",
+        comoFunciona:
+          "Classes e métodos agrupam os dados e as operações de cadastro, com validações básicas.",
+        tecnologias: ["Java", "POO"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Pedidos e enums",
+        oQueRepresenta: "A representação dos pedidos e de seus valores definidos.",
+        comoFunciona:
+          "Enums restringem as opções válidas e deixam explícitas as alternativas usadas pelo sistema de pedidos.",
+        tecnologias: ["Java", "Enums"],
+      },
+      {
+        imagem: null,
+        tituloEtapa: "Gerenciamento de salários",
+        oQueRepresenta: "A organização de dados e operações relacionadas aos salários.",
+        comoFunciona:
+          "Construtores, encapsulamento e métodos mantêm os dados organizados e aplicam operações de forma controlada.",
+        tecnologias: ["Java", "POO", "Coleções"],
+      },
+    ],
     status: "Concluído",
   },
 ];
